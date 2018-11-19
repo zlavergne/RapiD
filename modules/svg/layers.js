@@ -16,6 +16,7 @@ import { svgMapillarySigns } from './mapillary_signs';
 import { svgOpenstreetcamImages } from './openstreetcam_images';
 import { svgOsm } from './osm';
 import { svgNotes } from './notes';
+import { svgTouch } from './touch';
 import { utilRebind } from '../util/rebind';
 import { utilGetDimensions, utilSetDimensions } from '../util/dimensions';
 
@@ -32,7 +33,8 @@ export function svgLayers(projection, context) {
         { id: 'mapillary-images', layer: svgMapillaryImages(projection, context, dispatch) },
         { id: 'mapillary-signs',  layer: svgMapillarySigns(projection, context, dispatch) },
         { id: 'openstreetcam-images', layer: svgOpenstreetcamImages(projection, context, dispatch) },
-        { id: 'debug', layer: svgDebug(projection, context, dispatch) }
+        { id: 'debug', layer: svgDebug(projection, context, dispatch) },
+        { id: 'touch', layer: svgTouch(projection, context, dispatch) }
     ];
 
 
@@ -60,7 +62,7 @@ export function svgLayers(projection, context) {
 
         groups.enter()
             .append('g')
-            .attr('class', function(d) { return 'data-layer data-layer-' + d.id; })
+            .attr('class', function(d) { return 'data-layer ' + d.id; })
             .merge(groups)
             .each(function(d) { d3_select(this).call(d.layer); });
     }

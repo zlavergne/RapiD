@@ -90,7 +90,7 @@ function filterValues(allowUpperCase) {
     return function(d) {
         if (d.value.match(/[;,]/) !== null) return false;  // exclude some punctuation
         if (!allowUpperCase && d.value.match(/[A-Z*]/) !== null) return false;  // exclude uppercase letters
-        return parseFloat(d.fraction) > 0.0 || d.in_wiki;
+        return parseFloat(d.fraction) > 0.0;
     };
 }
 
@@ -182,7 +182,9 @@ export default {
     init: function() {
         inflight = {};
         taginfoCache = {};
-        popularKeys = {};
+        popularKeys = {
+            postal_code: true   // #5377
+        };
 
         // Fetch popular keys.  We'll exclude these from `values`
         // lookups because they stress taginfo, and they aren't likely

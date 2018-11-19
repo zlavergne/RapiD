@@ -28,6 +28,15 @@ _Breaking changes, which may affect downstream projects or sites that embed iD, 
 [@xxxx]: https://github.com/xxxx
 -->
 
+# 2.11.1
+##### Aug 29, 2018
+
+#### :bug: Bugfixes
+* Fix handling of `.gpx` files passed in via url ([#5253])
+
+[#5253]: https://github.com/openstreetmap/iD/issues/5253
+
+
 # 2.11.0
 ##### Aug 26, 2018
 
@@ -2945,7 +2954,7 @@ _Map traffic signals, stop signs, benches, crossings, street lamps, fountains, t
 * Trim tag keys, and prevent duplicate tag keys (#2043)
 * Fix inline tag help for fields that handle multiple tags
 * Add 'width', 'length', 'lit' for appropriate presets (cycleways, sidewalks, sports pitch, etc)
-* Render embarkment/cutting with dashed casing
+* Render embankment/cutting with dashed casing
 * Rendering fixes for buildings, tunnels
 * Add population field for various place presets
 * Improvements to circularize action (#2194)

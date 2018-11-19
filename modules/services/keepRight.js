@@ -32,7 +32,7 @@ var _keepRightCache = {
 	rtree: rbush()
 };
 var _off;
-var _keepRightZoom = 14;
+var _keepRightZoom = 16;
 
 var apiBase = 'https://www.keepright.at/';
 

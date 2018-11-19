@@ -3,7 +3,7 @@ import {
     select as d3_select
 } from 'd3-selection';
 
-import { d3keybinding as d3_keybinding } from '../lib/d3.keybinding.js';
+import { utilKeybinding } from '../util';
 
 import {
     behaviorBreathe,
@@ -24,7 +24,7 @@ export function modeSelectError(context, selectedErrorID) {
     };
 
     var keepRight = services.keepRight;
-    var keybinding = d3_keybinding('select-error');
+    var keybinding = utilKeybinding('select-error');
     var keepRightEditor = uiKeepRightEditor(context)
         .on('change', function() {
             context.map().pan([0,0]);  // trigger a redraw

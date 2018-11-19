@@ -178,15 +178,45 @@ export function rendererMap(context) {
             .selectAll('.surface')
             .attr('id', 'surface');
 
+
+        var prevScale;
+
         surface
             .call(drawLabels.observe)
+            .on('gesturestart.surface', function() {
+                prevScale = d3_event.scale;
+            })
+            .on('gesturechange.surface', function() {
+                // Remap Safari gesture events to wheel events - #5492
+                // We want these disabled most places, but enabled for zoom/unzoom on map surface
+                // https://developer.mozilla.org/en-US/docs/Web/API/GestureEvent
+                var e = d3_event;
+                e.preventDefault();
+
+                var deltaY = (e.scale > prevScale) ? -15 : 20;
+                prevScale = e.scale;
+
+                var props = {
+                    deltaY: deltaY ,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    screenX: e.screenX,
+                    screenY: e.screenY,
+                    x: e.x,
+                    y: e.y
+                };
+                var e2 = new WheelEvent('wheel', props);
+                _selection.node().dispatchEvent(e2);
+            })
             .on('mousedown.zoom', function() {
                 if (d3_event.button === 2) {
                     d3_event.stopPropagation();
                 }
             }, true)
             .on('mouseup.zoom', function() {
-                if (resetTransform()) immediateRedraw();
+                if (resetTransform()) {
+                    immediateRedraw();
+                }
             })
             .on('mousemove.map', function() {
                 mousemove = d3_event;
@@ -194,16 +224,14 @@ export function rendererMap(context) {
             .on('mouseover.vertices', function() {
                 if (map.editable() && !_transformed) {
                     var hover = d3_event.target.__data__;
-                    surface.selectAll('.data-layer-osm')
-                        .call(drawVertices.drawHover, context.graph(), hover, map.extent());
+                    surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
                     dispatch.call('drawn', this, { full: false });
                 }
             })
             .on('mouseout.vertices', function() {
                 if (map.editable() && !_transformed) {
                     var hover = d3_event.relatedTarget && d3_event.relatedTarget.__data__;
-                    surface.selectAll('.data-layer-osm')
-                        .call(drawVertices.drawHover, context.graph(), hover, map.extent());
+                    surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
                     dispatch.call('drawn', this, { full: false });
                 }
             });
@@ -232,7 +260,7 @@ export function rendererMap(context) {
 
                 data = context.features().filter(data, graph);
 
-                surface.selectAll('.data-layer-osm')
+                surface
                     .call(drawVertices.drawSelected, graph, map.extent())
                     .call(drawLines, graph, data, filter)
                     .call(drawAreas, graph, data, filter)
@@ -327,11 +355,10 @@ export function rendererMap(context) {
         if (mode && mode.id === 'select') {
             // update selected vertices - the user might have just double-clicked a way,
             // creating a new vertex, triggering a partial redraw without a mode change
-            surface.selectAll('.data-layer-osm')
-                .call(drawVertices.drawSelected, graph, map.extent());
+            surface.call(drawVertices.drawSelected, graph, map.extent());
         }
 
-        surface.selectAll('.data-layer-osm')
+        surface
             .call(drawVertices, graph, data, filter, map.extent(), fullRedraw)
             .call(drawLines, graph, data, filter)
             .call(drawAreas, graph, data, filter)
@@ -346,6 +373,7 @@ export function rendererMap(context) {
     function editOff() {
         context.features().resetStats();
         surface.selectAll('.layer-osm *').remove();
+        surface.selectAll('.layer-touch *').remove();
 
         var mode = context.mode();
         if (mode && mode.id !== 'save' && mode.id !== 'select-data' && mode.id !== 'select-error' && mode.id !== 'select-note') {
@@ -662,13 +690,11 @@ export function rendererMap(context) {
 
     map.dimensions = function(_) {
         if (!arguments.length) return dimensions;
-        var center = map.center();
         dimensions = _;
         drawLayers.dimensions(dimensions);
         context.background().dimensions(dimensions);
         projection.clipExtent([[0, 0], dimensions]);
         mouse = utilFastMouse(supersurface.node());
-        setCenter(center);
 
         scheduleRedraw();
         return map;
@@ -840,7 +866,7 @@ export function rendererMap(context) {
 
 
     map.editable = function() {
-        var osmLayer = surface.selectAll('.data-layer-osm');
+        var osmLayer = surface.selectAll('.data-layer.osm');
         if (!osmLayer.empty() && osmLayer.classed('disabled')) return false;
 
         return map.zoom() >= context.minEditableZoom();
@@ -848,7 +874,7 @@ export function rendererMap(context) {
 
 
     map.notesEditable = function() {
-        var noteLayer = surface.selectAll('.data-layer-notes');
+        var noteLayer = surface.selectAll('.data-layer.notes');
         if (!noteLayer.empty() && noteLayer.classed('disabled')) return false;
 
         return map.zoom() >= context.minEditableZoom();
